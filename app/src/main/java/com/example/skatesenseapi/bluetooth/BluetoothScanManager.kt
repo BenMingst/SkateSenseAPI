@@ -1,51 +1,60 @@
 package com.example.skatesenseapi.bluetooth
 
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
-@SuppressLint("MissingPermission")
 class BluetoothScanManager(
     private val context: Context,
     private val bluetoothAdapter: BluetoothAdapter
 ) {
-    private var scanner: BluetoothLeScanner? = null
-    private val discoveredDevices = mutableMapOf<String, BluetoothDevice>()
-    
-    private val _scanResults = MutableStateFlow<Map<String, BluetoothDevice>>(emptyMap())
-    val scanResults: StateFlow<Map<String, BluetoothDevice>> = _scanResults
-    
+    private val _scannedDevices = MutableStateFlow<Set<BluetoothDevice>>(emptySet())
+    val scannedDevices: StateFlow<Set<BluetoothDevice>> = _scannedDevices.asStateFlow()
+
+    private val scanner = bluetoothAdapter.bluetoothLeScanner
+    private var isScanning = false
+
     private val scanCallback = object : ScanCallback() {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            device.name?.let { name ->
-                if (name.contains("SkateSense", ignoreCase = true)) {
-                    discoveredDevices[device.address] = device
-                    _scanResults.value = discoveredDevices.toMap()
-                }
+            if (device.name != null) {
+                _scannedDevices.value = _scannedDevices.value + device
             }
+        }
+
+        override fun onBatchScanResults(results: List<ScanResult>) {
+            val newDevices = results
+                .map { it.device }
+                .filter { it.name != null }
+            _scannedDevices.value = _scannedDevices.value + newDevices
         }
 
         override fun onScanFailed(errorCode: Int) {
             // Handle scan failure
+            isScanning = false
         }
     }
 
     fun startScan() {
-        discoveredDevices.clear()
-        _scanResults.value = emptyMap()
-        
-        scanner = bluetoothAdapter.bluetoothLeScanner
-        scanner?.startScan(scanCallback)
+        if (!isScanning && bluetoothAdapter.isEnabled) {
+            _scannedDevices.value = emptySet()
+            scanner?.startScan(scanCallback)
+            isScanning = true
+        }
     }
 
     fun stopScan() {
-        scanner?.stopScan(scanCallback)
+        if (isScanning) {
+            scanner?.stopScan(scanCallback)
+            isScanning = false
+        }
     }
+
+    val isEnabled: Boolean
+        get() = bluetoothAdapter.isEnabled
 }

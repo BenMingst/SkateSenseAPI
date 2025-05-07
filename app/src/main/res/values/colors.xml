@@ -1,9 +1,18 @@
-<![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="md_theme_light_primary">#006C4C</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#89F8C7</color>
     <color name="md_theme_light_onPrimaryContainer">#002114</color>
+    <color name="md_theme_light_secondary">#4C6358</color>
+    <color name="md_theme_light_onSecondary">#FFFFFF</color>
+    <color name="md_theme_light_secondaryContainer">#CFE9DB</color>
+    <color name="md_theme_light_onSecondaryContainer">#0A1F16</color>
+    <color name="md_theme_light_surface">#FFFFFF</color>
+    <color name="md_theme_light_onSurface">#191C1B</color>
+    <color name="md_theme_light_surfaceVariant">#DBE5DE</color>
+    <color name="md_theme_light_onSurfaceVariant">#404944</color>
+    <color name="md_theme_light_outline">#707973</color>
     <color name="md_theme_light_error">#BA1A1A</color>
     <color name="md_theme_light_onError">#FFFFFF</color>
 
@@ -21,8 +30,8 @@
     <color name="alert_water">#2196F3</color>
     <color name="alert_electrolyte">#FFA000</color>
     <color name="alert_food">#8BC34A</color>
-    
+
     <!-- JSON preview colors -->
     <color name="json_background">#F5F5F5</color>
     <color name="json_text">#263238</color>
-</resources>]]>
+</resources>

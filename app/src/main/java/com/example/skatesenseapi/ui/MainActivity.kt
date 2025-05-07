@@ -144,11 +144,10 @@ class MainActivity : AppCompatActivity() {
         binding.bluetoothStatus.apply {
             this.text = text
             setCompoundDrawablesWithIntrinsicBounds(
-                R.drawable.ic_status_dot,
-                0, 0, 0
+                R.drawable.ic_status_dot, 0, 0, 0
             )
             compoundDrawables[0]?.setTint(
-                ContextCompat.getColor(context, color)
+                ContextCompat.getColor(this@MainActivity, color)
             )
         }
     }

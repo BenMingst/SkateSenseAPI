@@ -1,4 +1,4 @@
-package com.skatesense.api.data
+package com.example.skatesenseapi.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

@@ -1,15 +1,21 @@
-package com.skatesense.api.data
+package com.example.skatesenseapi.data
 
 import android.content.Context
 import android.location.Location
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import java.util.*
+import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.roundToInt
 
-class SessionRepository(context: Context) {
-    private val sessionDao = AppDatabase.getDatabase(context).sessionDao()
+@Singleton
+class SessionRepository @Inject constructor(
+    private val sessionDao: SessionDao
+) {
     private val gson = Gson()
+
+    val allSessions: Flow<List<SessionEntity>> = sessionDao.getAllSessions()
 
     suspend fun createSession(
         startTime: Date,
@@ -45,25 +51,32 @@ class SessionRepository(context: Context) {
         return sessionDao.insertSession(session)
     }
 
-    fun getAllSessions(): Flow<List<SessionEntity>> = sessionDao.getAllSessions()
+    suspend fun deleteSession(session: SessionEntity) {
+        sessionDao.deleteSession(session)
+    }
 
-    fun getSessionsBetweenDates(start: Date, end: Date): Flow<List<SessionEntity>> =
-        sessionDao.getSessionsBetweenDates(start, end)
+    suspend fun getSessionById(id: Long): SessionEntity? {
+        return sessionDao.getSessionById(id)
+    }
 
-    suspend fun getSessionById(id: Long): SessionEntity? = sessionDao.getSessionById(id)
+    fun getSessionsBetweenDates(start: Date, end: Date): Flow<List<SessionEntity>> {
+        return sessionDao.getSessionsBetweenDates(start, end)
+    }
 
-    suspend fun deleteSession(session: SessionEntity) = sessionDao.deleteSession(session)
+    suspend fun getTotalDistanceForDateRange(start: Date, end: Date): Float {
+        return sessionDao.getTotalDistanceForDateRange(start, end) ?: 0f
+    }
 
-    suspend fun deleteOldSessions(olderThan: Date) = sessionDao.deleteSessionsOlderThan(olderThan)
+    suspend fun getAverageSpeedForDateRange(start: Date, end: Date): Float {
+        return sessionDao.getAverageSpeedForDateRange(start, end) ?: 0f
+    }
 
-    suspend fun getStatisticsForTimeRange(start: Date, end: Date): SessionStatistics {
-        return SessionStatistics(
-            totalDistance = sessionDao.getTotalDistanceForDateRange(start, end) ?: 0f,
-            averageSpeed = sessionDao.getAverageSpeedForDateRange(start, end) ?: 0f,
-            allTimeMaxSpeed = sessionDao.getAllTimeMaxSpeed() ?: 0f,
-            totalDuration = sessionDao.getTotalDurationForDateRange(start, end) ?: 0L,
-            sessionCount = sessionDao.getSessionCount()
-        )
+    suspend fun getAllTimeMaxSpeed(): Float {
+        return sessionDao.getAllTimeMaxSpeed() ?: 0f
+    }
+
+    suspend fun getLatestSession(): SessionEntity? {
+        return sessionDao.getLatestSession()
     }
 
     private fun createGeoJson(locations: List<Location>): String {

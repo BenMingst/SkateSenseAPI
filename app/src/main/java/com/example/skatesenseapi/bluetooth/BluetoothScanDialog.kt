@@ -7,10 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.skatesenseapi.databinding.DialogBluetoothScanBinding
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 class BluetoothScanDialog(
     private val scanManager: BluetoothScanManager,
@@ -19,7 +18,10 @@ class BluetoothScanDialog(
 
     private var _binding: DialogBluetoothScanBinding? = null
     private val binding get() = _binding!!
-    private lateinit var deviceAdapter: BluetoothDeviceAdapter
+    private val deviceAdapter = BluetoothDeviceAdapter { device ->
+        onDeviceSelected(device)
+        dismiss()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -32,39 +34,26 @@ class BluetoothScanDialog(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupUI()
-        observeScanResults()
-        startScanning()
-    }
 
-    private fun setupUI() {
-        deviceAdapter = BluetoothDeviceAdapter { device ->
-            onDeviceSelected(device)
-            dismiss()
-        }
-
-        binding.deviceList.apply {
-            layoutManager = LinearLayoutManager(requireContext())
-            adapter = deviceAdapter
-        }
-
-        binding.cancelButton.setOnClickListener {
-            dismiss()
-        }
-    }
-
-    private fun observeScanResults() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            scanManager.scanResults.collectLatest { devices ->
-                deviceAdapter.submitList(devices.values.toList())
-                binding.scanProgress.visibility = 
-                    if (devices.isEmpty()) View.VISIBLE else View.GONE
+        binding.deviceList.adapter = deviceAdapter
+        binding.scanButton.setOnClickListener {
+            if (scanManager.isScanning) {
+                scanManager.stopScan()
+                binding.scanButton.text = "Start Scan"
+                binding.progressBar.visibility = View.GONE
+            } else {
+                scanManager.startScan()
+                binding.scanButton.text = "Stop Scan"
+                binding.progressBar.visibility = View.VISIBLE
             }
         }
-    }
 
-    private fun startScanning() {
-        scanManager.startScan()
+        scanManager.scannedDevices
+            .onEach { devices ->
+                deviceAdapter.submitList(devices.toList())
+                binding.emptyView.visibility = if (devices.isEmpty()) View.VISIBLE else View.GONE
+            }
+            .launchIn(viewLifecycleOwner.lifecycleScope)
     }
 
     override fun onDestroyView() {

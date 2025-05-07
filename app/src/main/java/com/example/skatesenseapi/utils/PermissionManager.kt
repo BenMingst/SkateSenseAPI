@@ -9,10 +9,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 class PermissionManager(private val context: Context) {
+
     companion object {
         const val PERMISSION_REQUEST_CODE = 123
-        
-        val REQUIRED_PERMISSIONS = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        private val REQUIRED_PERMISSIONS = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -29,29 +29,29 @@ class PermissionManager(private val context: Context) {
         }
     }
 
-    fun checkAndRequestPermissions(activity: Activity) {
-        val permissionsToRequest = mutableListOf<String>()
-        
-        for (permission in REQUIRED_PERMISSIONS) {
-            if (ContextCompat.checkSelfPermission(context, permission) != 
-                PackageManager.PERMISSION_GRANTED) {
-                permissionsToRequest.add(permission)
-            }
+    fun arePermissionsGranted(): Boolean {
+        return REQUIRED_PERMISSIONS.all {
+            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
         }
-        
+    }
+
+    fun checkAndRequestPermissions(activity: Activity) {
+        val permissionsToRequest = REQUIRED_PERMISSIONS.filter {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        }.toTypedArray()
+
         if (permissionsToRequest.isNotEmpty()) {
             ActivityCompat.requestPermissions(
                 activity,
-                permissionsToRequest.toTypedArray(),
+                permissionsToRequest,
                 PERMISSION_REQUEST_CODE
             )
         }
     }
 
-    fun arePermissionsGranted(): Boolean {
-        return REQUIRED_PERMISSIONS.all { permission ->
-            ContextCompat.checkSelfPermission(context, permission) == 
-                PackageManager.PERMISSION_GRANTED
+    fun shouldShowRationale(activity: Activity): Boolean {
+        return REQUIRED_PERMISSIONS.any {
+            ActivityCompat.shouldShowRequestPermissionRationale(activity, it)
         }
     }
 }
