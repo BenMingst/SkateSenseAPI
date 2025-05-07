@@ -1,0 +1,28 @@
+<![CDATA[<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="md_theme_light_primary">#006C4C</color>
+    <color name="md_theme_light_onPrimary">#FFFFFF</color>
+    <color name="md_theme_light_primaryContainer">#89F8C7</color>
+    <color name="md_theme_light_onPrimaryContainer">#002114</color>
+    <color name="md_theme_light_error">#BA1A1A</color>
+    <color name="md_theme_light_onError">#FFFFFF</color>
+
+    <!-- Status colors -->
+    <color name="status_connected">#43A047</color>
+    <color name="status_connecting">#FB8C00</color>
+    <color name="status_disconnected">#E53935</color>
+
+    <!-- Terrain colors -->
+    <color name="terrain_uphill">#FF5722</color>
+    <color name="terrain_downhill">#2196F3</color>
+    <color name="terrain_level">#4CAF50</color>
+
+    <!-- Alert colors -->
+    <color name="alert_water">#2196F3</color>
+    <color name="alert_electrolyte">#FFA000</color>
+    <color name="alert_food">#8BC34A</color>
+    
+    <!-- JSON preview colors -->
+    <color name="json_background">#F5F5F5</color>
+    <color name="json_text">#263238</color>
+</resources>]]>
